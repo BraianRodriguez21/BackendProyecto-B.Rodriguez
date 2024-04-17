@@ -10,7 +10,7 @@ app.use('/api/products', productRouter);
 app.use('/api/carts', cartRouter);
 
 app.get('/', (req, res) => {
-    res.send('Bienvenido');
+    res.send('Primera Preentrega');
 });
 
 app.listen(port, () => {
