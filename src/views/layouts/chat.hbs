@@ -1,0 +1,19 @@
+<body>
+    <div class="chat-container">
+        <h2>Chat</h2>
+        <div id="chat-messages">
+            {{#each messages}}
+                <div class="message">
+                    <span class="user">{{this.user}}</span>: {{this.message}}
+                </div>
+            {{/each}}
+        </div>
+        <form id="chat-form">
+            <input type="text" id="user" placeholder="Tu nombre">
+            <input type="text" id="message" placeholder="Mensaje">
+            <button type="submit">Enviar</button>
+        </form>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/chat.js"></script>
+</body>
