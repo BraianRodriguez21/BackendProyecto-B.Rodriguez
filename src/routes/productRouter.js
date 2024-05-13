@@ -1,5 +1,6 @@
 const express = require('express');
 const Product = require('../models/productModel');
+// const mongoose = require('mongoose');
 import { Router } from 'express';
 
 export const productRouter = Router();
