@@ -1,40 +1,45 @@
-const express = require('express');
-const Product = require('../models/productModel');
-// const mongoose = require('mongoose');
-import { Router } from 'express';
-
-export const productRouter = Router();
+import express from 'express';
+import Product from '../models/productModel';
 
 const router = express.Router();
 
-router.post('/', async (req, res) => {
-    try {
-        const product = new Product(req.body);
-        const savedProduct = await product.save();
-        req.io.emit('new-product', savedProduct);
-        res.status(201).json({ success: true, payload: savedProduct, message: 'Producto agregado' });
-    } catch (error) {
-        res.status(500).json({ success: false, message: 'No se pudo agregar el producto' });
-    }
-});
-
 router.get('/', async (req, res) => {
     try {
-        const products = await Product.find();
-        res.json({ success: true, payload: products, message: 'Productos obtenidos' });
+        let { limit = 10, page = 1, sort, query } = req.query;
+        limit = parseInt(limit);
+        page = parseInt(page);
+
+        let mongoQuery = {};
+
+        if (query) {
+            mongoQuery = { $text: { $search: query } };
+        }
+
+        const totalProducts = await Product.countDocuments(mongoQuery);
+
+        const totalPages = Math.ceil(totalProducts / limit);
+
+        const startIndex = (page - 1) * limit;
+        const endIndex = page * limit;
+
+        const options = { skip: startIndex, limit };
+
+        if (sort) {
+            options.sort = sort;
+        }
+
+        const products = await Product.find(mongoQuery, null, options);
+
+        const prevPage = page > 1 ? page - 1 : null;
+        const nextPage = page < totalPages ? page + 1 : null;
+
+        const prevLink = prevPage ? `/api/products?limit=${limit}&page=${prevPage}` : null;
+        const nextLink = nextPage ? `/api/products?limit=${limit}&page=${nextPage}` : null;
+
+        res.json({ status: 'success', payload: products, totalPages, prevPage, nextPage, page, prevLink, nextLink });
     } catch (error) {
-        res.status(500).json({ success: false, message: 'Error al obtener los productos' });
+        res.status(500).json({ status: 'error', message: 'Error al obtener los productos' });
     }
 });
 
-router.get('/realtimeproducts', async (req, res) => {
-    try {
-        const products = await Product.find();
-        res.render('realtimeproducts', { products });
-    } catch (error) {
-        res.status(500).json({ success: false, message: 'Error al renderizar la vista de productos en tiempo real' });
-    }
-});
-
-module.exports = router;
-
+export default router;
