@@ -1,7 +1,7 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import { viewRouter } from './routes/viewRouter.js';
-import { productRouter } from './routes/productRouter.js';
+import productRouter  from './routes/productRouter.js';
 import { cartRouter } from './routes/cartRouter.js';
 import { handlebarsConf } from './config/handlebarsConfig.js';
 import { socketConf } from './config/socketConfig.js';
@@ -23,7 +23,7 @@ app.use((req, res, next) => {
     next();
 });
 
-mongoose.connect('mongodb://localhost:27017/', {
+mongoose.connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true
 }).then(() => console.log('MongoDB connected'))

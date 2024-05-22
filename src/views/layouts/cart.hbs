@@ -1,21 +1,26 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cart</title>
+    <title>Carrito</title>
 </head>
 <body>
-    <h1>Shopping Cart</h1>
-    <ul>
-        {{#each cartItems}}
-            <li>
-                <p>Product: {{this.productName}}</p>
-                <p>Price: ${{this.price}}</p>
-                <p>Quantity: {{this.quantity}}</p>
-            </li>
+    <h1>Carrito</h1>
+    <form id="cartForm">
+        <input type="text" name="productId" placeholder="ID del Producto" required>
+        <input type="number" name="quantity" placeholder="Cantidad" required>
+        <button type="submit">Agregar al Carrito</button>
+    </form>
+    <div class="cart-container">
+        {{#each cart.products}}
+        <div class="cart-item">
+            <h3>{{this.product.title}}</h3>
+            <p>Cantidad: {{this.quantity}}</p>
+        </div>
         {{/each}}
-    </ul>
-    <p>Total Price: ${{totalPrice}}</p>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/main.js"></script>
 </body>
 </html>

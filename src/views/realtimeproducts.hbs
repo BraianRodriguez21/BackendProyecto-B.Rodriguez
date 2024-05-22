@@ -1,21 +1,28 @@
-<h1>Products</h1>
-{{#each products}}
-<div>
-    <h2>{{this.title}}</h2>
-    <p>{{this.description}}</p>
-    <p>{{this.price}}</p>
-</div>
-{{/each}}
-<nav>
-    {{#if hasPrevPage}}
-        <a href="{{prevLink}}">Previous</a>
-    {{else}}
-        <span>Previous</span>
-    {{/if}}
-    <span>Page {{page}} of {{totalPages}}</span>
-    {{#if hasNextPage}}
-        <a href="{{nextLink}}">Next</a>
-    {{else}}
-        <span>Next</span>
-    {{/if}}
-</nav>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Productos</title>
+</head>
+<body>
+    <h1>Productos</h1>
+    <form id="productForm">
+        <input type="text" name="title" placeholder="Título" required>
+        <input type="number" name="price" placeholder="Precio" required>
+        <input type="text" name="description" placeholder="Descripción" required>
+        <button type="submit">Agregar Producto</button>
+    </form>
+    <div class="card-container">
+        {{#each products}}
+        <div class="card">
+            <h3>{{this.title}}</h3>
+            <p>Precio: {{this.price}}</p>
+            <p>Descripción: {{this.description}}</p>
+        </div>
+        {{/each}}
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/main.js"></script>
+</body>
+</html>
