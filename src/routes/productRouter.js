@@ -1,45 +1,46 @@
 import express from 'express';
-import Product from '../models/productModel';
+import Product from '../models/productModel.js';
 
 const router = express.Router();
 
-router.get('/', async (req, res) => {
+router.post('/', async (req, res) => {
     try {
-        let { limit = 10, page = 1, sort, query } = req.query;
-        limit = parseInt(limit);
-        page = parseInt(page);
-
-        let mongoQuery = {};
-
-        if (query) {
-            mongoQuery = { $text: { $search: query } };
-        }
-
-        const totalProducts = await Product.countDocuments(mongoQuery);
-
-        const totalPages = Math.ceil(totalProducts / limit);
-
-        const startIndex = (page - 1) * limit;
-        const endIndex = page * limit;
-
-        const options = { skip: startIndex, limit };
-
-        if (sort) {
-            options.sort = sort;
-        }
-
-        const products = await Product.find(mongoQuery, null, options);
-
-        const prevPage = page > 1 ? page - 1 : null;
-        const nextPage = page < totalPages ? page + 1 : null;
-
-        const prevLink = prevPage ? `/api/products?limit=${limit}&page=${prevPage}` : null;
-        const nextLink = nextPage ? `/api/products?limit=${limit}&page=${nextPage}` : null;
-
-        res.json({ status: 'success', payload: products, totalPages, prevPage, nextPage, page, prevLink, nextLink });
+        const product = new Product(req.body);
+        const savedProduct = await product.save();
+        req.io.emit('new-product', savedProduct);
+        res.status(201).json({ success: true, payload: savedProduct, message: 'Producto agregado' });
     } catch (error) {
-        res.status(500).json({ status: 'error', message: 'Error al obtener los productos' });
+        res.status(500).json({ success: false, message: 'No se pudo agregar el producto' });
     }
 });
 
-export default router;
+router.get('/', async (req, res) => {
+    try {
+        const { limit = 10, page = 1, sort, query } = req.query;
+        const options = {
+            limit: parseInt(limit),
+            page: parseInt(page),
+            sort: sort ? { price: sort === 'asc' ? 1 : -1 } : {}
+        };
+
+        const filter = query ? { title: new RegExp(query, 'i') } : {};
+        const products = await Product.paginate(filter, options);
+
+        res.json({
+            status: 'success',
+            payload: products.docs,
+            totalPages: products.totalPages,
+            prevPage: products.prevPage,
+            nextPage: products.nextPage,
+            page: products.page,
+            hasPrevPage: products.hasPrevPage,
+            hasNextPage: products.hasNextPage,
+            prevLink: products.hasPrevPage ? `/api/products?page=${products.prevPage}` : null,
+            nextLink: products.hasNextPage ? `/api/products?page=${products.nextPage}` : null
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Error al obtener los productos' });
+    }
+});
+
+export const productRouter = router;

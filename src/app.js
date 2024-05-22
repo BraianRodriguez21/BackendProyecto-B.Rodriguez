@@ -1,8 +1,9 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import { viewRouter } from './routes/viewRouter.js';
-import { handlebarsConf } from './config/handlebarsConfig.js';
 import { productRouter } from './routes/productRouter.js';
+import { cartRouter } from './routes/cartRouter.js';
+import { handlebarsConf } from './config/handlebarsConfig.js';
 import { socketConf } from './config/socketConfig.js';
 
 
@@ -21,15 +22,15 @@ app.use((req, res, next) => {
     req.io = io;
     next();
 });
-// mongoose.connect('mongodb+srv://braianrodriguez:ReinosXan21@ecommercegaming.dyihcoy.mongodb.net/Ecommerce?retryWrites=true&w=majority&appName=EcommerceGaming' , {
-    mongoose.connect('mongodb://localhost:27017/', {
+
+mongoose.connect('mongodb://localhost:27017/', {
     useNewUrlParser: true,
     useUnifiedTopology: true
-    }).then(() => console.log('Mongo connected'))
-    .catch(err => console.error('error:', err))
-console.log('base conectada')
+}).then(() => console.log('MongoDB connected'))
+  .catch(err => console.error('MongoDB connection error:', err));
 
 app.use('/', viewRouter);
 app.use('/api/products', productRouter);
+app.use('/api/carts', cartRouter);
 
 export { app };

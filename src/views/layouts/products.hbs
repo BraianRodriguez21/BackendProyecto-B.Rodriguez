@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Productos</title>
+</head>
+<body>
+    <h1>Productos</h1>
+    {{#each products}}
+    <div class="product">
+        <h3>{{this.title}}</h3>
+        <p>Precio: {{this.price}}</p>
+        <p>Descripción: {{this.description}}</p>
+        <button onclick="addToCart('{{this._id}}')">Agregar al carrito</button>
+    </div>
+    {{/each}}
+    <div class="pagination">
+        {{#if hasPrevPage}}
+        <a href="{{prevLink}}">Anterior</a>
+        {{/if}}
+        {{#if hasNextPage}}
+        <a href="{{nextLink}}">Siguiente</a>
+        {{/if}}
+    </div>
+    <script>
+        function addToCart(productId) {
+
+        }
+    </script>
+</body>
+</html>
