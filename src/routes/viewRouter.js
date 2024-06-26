@@ -1,19 +1,18 @@
 import { Router } from 'express';
 
-export const viewRouter = Router();
+const router = Router();
 
-viewRouter.get('/', async (req, res) => {
-	const response = await fetch('http://localhost:8080/api/products');
-	const data = await response.json();
-	res.render('home', {
-		products: data.payload,
-	});
+router.get('/login', (req, res) => {
+    res.render('login');
 });
 
-viewRouter.get('/realtimeproducts', async (req, res) => {
-    const response = await fetch('http://localhost:8080/api/products');
-    const data = await response.json();
-    res.render('realtimeproducts', {
-        products: data.products, 
-    });
+router.get('/register', (req, res) => {
+    res.render('register');
 });
+
+router.get('/products', (req, res) => {
+    const token = req.query.token;
+    res.render('products', { token });
+});
+
+export { router as viewRouter };

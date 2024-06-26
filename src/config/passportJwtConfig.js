@@ -1,25 +1,24 @@
+import passport from 'passport';
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
-import { User } from '../models/userModel.js';
-import { verifyToken } from './jwtConfig.js';
+import { findUserById } from '../dao/userDao.js';
+import { config } from './config.js';
 
 const opts = {
     jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-    secretOrKey: 'your_jwt_secret'
+    secretOrKey: config.jwtSecret
 };
 
-export const passportJwtConfig = (app) => {
-    passport.use(new JwtStrategy(opts, async (jwt_payload, done) => {
-        try {
-            const user = await User.findById(jwt_payload.id);
-            if (user) {
-                return done(null, user);
-            } else {
-                return done(null, false);
-            }
-        } catch (err) {
-            return done(err, false);
+passport.use(new JwtStrategy(opts, async (jwtPayload, done) => {
+    try {
+        const user = await findUserById(jwtPayload.id);
+        if (user) {
+            return done(null, user);
+        } else {
+            return done(null, false);
         }
-    }));
+    } catch (error) {
+        return done(error, false);
+    }
+}));
 
-    app.use(passport.initialize());
-};
+export default passport;

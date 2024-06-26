@@ -1,35 +1,10 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Productos</title>
-    <link rel="stylesheet" href="/css/styles.css">
-</head>
-<body>
-    {{#if user}}
-        <p>Bienvenido, {{user.email}}. Rol: {{user.role}}</p>
-        <a href="/api/users/logout">Cerrar sesión</a>
-    {{else}}
-        <p>No estás logueado. <a href="/login">Iniciar sesión</a></p>
-    {{/if}}
-    <h1>Productos</h1>
-    <form id="productForm">
-        <input type="text" name="title" placeholder="Título" required>
-        <input type="number" name="price" placeholder="Precio" required>
-        <input type="text" name="description" placeholder="Descripción" required>
-        <button type="submit">Agregar Producto</button>
-    </form>
-    <div class="card-container">
-        {{#each products}}
-        <div class="card">
-            <h3>{{this.title}}</h3>
-            <p>Precio: {{this.price}}</p>
-            <p>Descripción: {{this.description}}</p>
+<h1>Welcome, {{user.first_name}} {{user.last_name}}</h1>
+<div class="products">
+    {{#each products}}
+        <div class="product">
+            <h2>{{this.title}}</h2>
+            <p>{{this.price}}</p>
+            <button>Add to cart</button>
         </div>
-        {{/each}}
-    </div>
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="/js/main.js"></script>
-</body>
-</html>
+    {{/each}}
+</div>

@@ -1,16 +1,8 @@
 import jwt from 'jsonwebtoken';
-
-const secret = 'your_jwt_secret';
+import { config } from './config.js';
 
 export const generateToken = (user) => {
-    const payload = {
-        id: user._id,
-        email: user.email,
-        role: user.role
-    };
-    return jwt.sign(payload, secret, { expiresIn: '1h' });
+    return jwt.sign({ id: user._id, email: user.email, role: user.role }, config.jwtSecret, { expiresIn: '1h' });
 };
 
-export const verifyToken = (token) => {
-    return jwt.verify(token, secret);
-};
+

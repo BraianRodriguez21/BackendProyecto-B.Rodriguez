@@ -1,14 +1,15 @@
 import express from 'express';
 import mongoose from 'mongoose';
+import { config } from './config/config.js';
 import session from 'express-session';
-import { viewRouter } from './routes/viewRouter.js';
-import { productRouter } from './routes/productRouter.js';
-import { cartRouter } from './routes/cartRouter.js';
-import { authRouter } from './routes/authRouter.js';
+import passport from './config/passportConfig.js';
+import jwtPassport from './config/passportJwtConfig.js';
 import { handlebarsConf } from './config/handlebarsConfig.js';
 import { socketConf } from './config/socketConfig.js';
-import { passportConfig } from './config/passportConfig.js';
-import { passportJwtConfig } from './config/passportJwtConfig.js';
+import { userRouter } from './routes/userRouter.js';
+import { productRouter } from './routes/productRouter.js';
+import { cartRouter } from './routes/cartRouter.js';
+import { viewRouter } from './routes/viewRouter.js';
 
 const app = express();
 
@@ -17,17 +18,19 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
 app.use(session({
-    secret: 'your_secret_key',
+    secret: config.sessionSecret,
     resave: false,
     saveUninitialized: false
 }));
 
-passportConfig(app);
-passportJwtConfig(app);
+app.use(passport.initialize());
+app.use(passport.session());
+app.use(jwtPassport.initialize());
+
+const httpServer = app.listen(config.port, () => console.log(`Servidor en el puerto ${config.port}`));
 
 handlebarsConf(app);
 
-const httpServer = app.listen(8080, () => console.log('Servidor en el puerto 8080'));
 const io = socketConf(httpServer);
 
 app.use((req, res, next) => {
@@ -36,7 +39,7 @@ app.use((req, res, next) => {
     next();
 });
 
-mongoose.connect('', {
+mongoose.connect(config.mongoUrl, {
     useNewUrlParser: true,
     useUnifiedTopology: true
 }).then(() => console.log('MongoDB conectado'))
@@ -45,6 +48,6 @@ mongoose.connect('', {
 app.use('/', viewRouter);
 app.use('/api/products', productRouter);
 app.use('/api/carts', cartRouter);
-app.use('/auth', authRouter);
+app.use('/auth', userRouter);
 
 export { app };
