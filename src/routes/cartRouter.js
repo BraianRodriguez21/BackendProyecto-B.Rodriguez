@@ -1,109 +1,49 @@
-// import { Router } from 'express';
-// import { Cart } from '../models/cartModel.js';
+import express from 'express';
+import { Cart } from '../models/Cart.js';
+import { Product } from '../models/Product.js';
+import { Ticket } from '../models/Ticket.js';
+import { userOnly } from '../middlewares/authMiddleware.js';
 
-// const router = Router();
+const router = express.Router();
 
-// router.get('/:userId', async (req, res) => {
-//     try {
-//         const cart = await Cart.findOne({ userId: req.params.userId }).populate('products.productId');
-//         res.json({ success: true, payload: cart });
-//     } catch (error) {
-//         res.status(500).json({ success: false, message: 'Error al obtener el carrito' });
-//     }
-// });
+router.post('/:cid/purchase', userOnly, async (req, res) => {
+const { cid } = req.params;
+const cart = await Cart.findById(cid).populate('products.product');
 
-// router.post('/:userId/products/:productId', async (req, res) => {
-//     try {
-//         const { userId, productId } = req.params;
-//         let cart = await Cart.findOne({ userId });
+    if (!cart) {
+    return res.status(404).json({ message: 'Cart not found' });
+}
 
-//         if (!cart) {
-//             cart = new Cart({ userId, products: [{ productId }] });
-//         } else {
-//             const productIndex = cart.products.findIndex(p => p.productId.toString() === productId);
-//             if (productIndex > -1) {
-//                 cart.products[productIndex].quantity += 1;
-//             } else {
-//                 cart.products.push({ productId });
-//             }
-//         }
+let totalAmount = 0;
+const purchasedProducts = [];
+const failedProducts = [];
 
-//         await cart.save();
-//         res.json({ success: true, payload: cart });
-//     } catch (error) {
-//         res.status(500).json({ success: false, message: 'Error al agregar producto al carrito' });
-//     }
-// });
+for (const item of cart.products) {
+    if (item.product.stock >= item.quantity) {
+    item.product.stock -= item.quantity;
+    await item.product.save();
+      totalAmount += item.product.price * item.quantity;
+    purchasedProducts.push(item);
+    } else {
+    failedProducts.push(item.product._id);
+    }
+}
 
-// router.put('/:userId/products/:productId', async (req, res) => {
-//     try {
-//         const { userId, productId } = req.params;
-//         const { quantity } = req.body;
-//         const cart = await Cart.findOne({ userId });
+const ticket = new Ticket({
+    code: `TICKET-${Date.now()}`,
+    amount: totalAmount,
+    purchaser: req.user.email
+});
 
-//         if (!cart) {
-//             return res.status(404).json({ success: false, message: 'Carrito no encontrado' });
-//         }
+    await ticket.save();
 
-//         const productIndex = cart.products.findIndex(p => p.productId.toString() === productId);
-//         if (productIndex > -1) {
-//             cart.products[productIndex].quantity = quantity;
-//         } else {
-//             return res.status(404).json({ success: false, message: 'Producto no encontrado en el carrito' });
-//         }
+cart.products = cart.products.filter(item => failedProducts.includes(item.product._id));
+    await cart.save();
 
-//         await cart.save();
-//         res.json({ success: true, payload: cart });
-//     } catch (error) {
-//         res.status(500).json({ success: false, message: 'Error al actualizar la cantidad del producto' });
-//     }
-// });
-
-// router.delete('/:userId/products/:productId', async (req, res) => {
-//     try {
-//         const { userId, productId } = req.params;
-//         const cart = await Cart.findOne({ userId });
-
-//         if (!cart) {
-//             return res.status(404).json({ success: false, message: 'Carrito no encontrado' });
-//         }
-
-//         cart.products = cart.products.filter(p => p.productId.toString() !== productId);
-
-//         await cart.save();
-//         res.json({ success: true, payload: cart });
-//     } catch (error) {
-//         res.status(500).json({ success: false, message: 'Error al eliminar el producto del carrito' });
-//     }
-// });
-
-// router.delete('/:userId', async (req, res) => {
-//     try {
-//         const { userId } = req.params;
-//         const cart = await Cart.findOne({ userId });
-
-//         if (!cart) {
-//             return res.status(404).json({ success: false, message: 'Carrito no encontrado' });
-//         }
-
-//         cart.products = [];
-
-//         await cart.save();
-//         res.json({ success: true, payload: cart });
-//     } catch (error) {
-//         res.status(500).json({ success: false, message: 'Error al eliminar todos los productos del carrito' });
-//     }
-// });
-
-// export { router as cartRouter };
-import { Router } from 'express';
-import { getCartById, createCart, updateCartById, deleteCartById } from '../controllers/cartController.js';
-
-const router = Router();
-
-router.get('/:id', getCartById);
-router.post('/', createCart);
-router.put('/:id', updateCartById);
-router.delete('/:id', deleteCartById);
+res.json({
+    ticket,
+    failedProducts
+});
+});
 
 export { router as cartRouter };

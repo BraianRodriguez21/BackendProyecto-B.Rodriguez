@@ -3,6 +3,8 @@ import Product from '../models/productModel.js';
 
 const router = express.Router();
 
+router.get('/mockingproducts', getMockingProducts);
+
 router.post('/', async (req, res) => {
     try {
         const product = new Product(req.body);

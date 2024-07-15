@@ -1,33 +1,24 @@
 import express from 'express';
 import mongoose from 'mongoose';
-import { config } from './config/config.js';
-import session from 'express-session';
-import passport from './config/passportConfig.js';
-import jwtPassport from './config/passportJwtConfig.js';
-import { handlebarsConf } from './config/handlebarsConfig.js';
-import { socketConf } from './config/socketConfig.js';
-import { userRouter } from './routes/userRouter.js';
-import { productRouter } from './routes/productRouter.js';
-import { cartRouter } from './routes/cartRouter.js';
+import dotenv from 'dotenv';
 import { viewRouter } from './routes/viewRouter.js';
+import { handlebarsConf } from './config/handlebarsConfig.js';
+import { productRouter } from './routes/productRouter.js';
+import { socketConf } from './config/socketConfig.js';
+import { errorHandler } from './middleware/errorHandler.js';
+import { generateMockProducts } from './utils/mockData.js';
+import { currentUser } from './utils/tokenUtils.js';
+import cookieParser from 'cookie-parser';
+
+dotenv.config();
 
 const app = express();
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
+app.use(cookieParser());
 
-app.use(session({
-    secret: config.sessionSecret,
-    resave: false,
-    saveUninitialized: false
-}));
-
-app.use(passport.initialize());
-app.use(passport.session());
-app.use(jwtPassport.initialize());
-
-const httpServer = app.listen(config.port, () => console.log(`Servidor en el puerto ${config.port}`));
+const httpServer = app.listen(process.env.PORT || 8080, () => console.log(`Servidor en el puerto ${process.env.PORT || 8080}`));
 
 handlebarsConf(app);
 
@@ -35,19 +26,25 @@ const io = socketConf(httpServer);
 
 app.use((req, res, next) => {
     req.io = io;
-    res.locals.user = req.user;
     next();
 });
 
-mongoose.connect(config.mongoUrl, {
+mongoose.connect(process.env.MONGO_URL, {
     useNewUrlParser: true,
     useUnifiedTopology: true
-}).then(() => console.log('MongoDB conectado'))
-    .catch(err => console.error('Error al conectar a MongoDB:', err));
+}).then(() => console.log('Mongo connected'))
+.catch(err => console.error('error:', err));
 
 app.use('/', viewRouter);
 app.use('/api/products', productRouter);
-app.use('/api/carts', cartRouter);
-app.use('/auth', userRouter);
+
+app.get('/mockingproducts', (req, res) => {
+    const products = generateMockProducts();
+    res.json({ success: true, products });
+});
+
+app.use(currentUser);
+
+app.use(errorHandler);
 
 export { app };

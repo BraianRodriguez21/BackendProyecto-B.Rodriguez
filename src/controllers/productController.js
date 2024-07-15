@@ -1,6 +1,19 @@
 import { findAllProducts, findProductById, createProduct, updateProductById, deleteProductById } from '../dao/productDao.js';
+import { ErrorDictionary, CustomError } from '../utils/errorDictionary.js';
 
-export const getProducts = async (req, res) => {
+export const getProductById = async (req, res, next) => {
+    try {
+        const product = await findProductById(req.params.id);
+        if (!product) {
+            throw new CustomError(ErrorDictionary.PRODUCT_NOT_FOUND.message, ErrorDictionary.PRODUCT_NOT_FOUND.status);
+        }
+        res.json({ success: true, product });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const getProducts = async (req, res, next) => {
     const { limit = 10, page = 1, sort, query } = req.query;
     const options = {
         limit: parseInt(limit),
@@ -11,51 +24,39 @@ export const getProducts = async (req, res) => {
         const products = await findAllProducts(query ? JSON.parse(query) : {}, options);
         res.json({ success: true, products });
     } catch (error) {
-        res.status(500).json({ success: false, message: 'Error al obtener productos' });
+        next(error);
     }
 };
 
-export const getProductById = async (req, res) => {
-    try {
-        const product = await findProductById(req.params.id);
-        if (!product) {
-            return res.status(404).json({ success: false, message: 'Producto no encontrado' });
-        }
-        res.json({ success: true, product });
-    } catch (error) {
-        res.status(500).json({ success: false, message: 'Error al obtener producto' });
-    }
-};
-
-export const createProduct = async (req, res) => {
+export const createProduct = async (req, res, next) => {
     try {
         const product = await createProduct(req.body);
         res.json({ success: true, product });
     } catch (error) {
-        res.status(500).json({ success: false, message: 'Error al crear producto' });
+        next(error);
     }
 };
 
-export const updateProductById = async (req, res) => {
+export const updateProductById = async (req, res, next) => {
     try {
         const product = await updateProductById(req.params.id, req.body);
         if (!product) {
-            return res.status(404).json({ success: false, message: 'Producto no encontrado' });
+            throw new CustomError(ErrorDictionary.PRODUCT_NOT_FOUND.message, ErrorDictionary.PRODUCT_NOT_FOUND.status);
         }
         res.json({ success: true, product });
     } catch (error) {
-        res.status(500).json({ success: false, message: 'Error al actualizar producto' });
+        next(error);
     }
 };
 
-export const deleteProductById = async (req, res) => {
+export const deleteProductById = async (req, res, next) => {
     try {
         const product = await deleteProductById(req.params.id);
         if (!product) {
-            return res.status(404).json({ success: false, message: 'Producto no encontrado' });
+            throw new CustomError(ErrorDictionary.PRODUCT_NOT_FOUND.message, ErrorDictionary.PRODUCT_NOT_FOUND.status);
         }
         res.json({ success: true, message: 'Producto eliminado' });
     } catch (error) {
-        res.status(500).json({ success: false, message: 'Error al eliminar producto' });
+        next(error);
     }
 };
