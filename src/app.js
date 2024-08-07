@@ -7,11 +7,13 @@ import cookieParser from 'cookie-parser';
 import { config } from './config/config.js';
 import { viewRouter } from './routes/viewRouter.js';
 import productRouter from './routes/productRouter.js';
-import authRouter from './routes/authRouter.js';
+import cartRouter from './routes/cartRouter.js';
+import userRouter from './routes/userRoutes.js'; 
 import { handlebarsConf } from './config/handlebarsConfig.js';
 import { socketConf } from './config/socketConfig.js';
 import { errorHandler } from './middleware/errorHandler.js';
-import './config/passportConfig.js'; // Importa la configuración de Passport
+import { swaggerUi, specs } from './config/swaggerConfig.js';
+import './config/passportConfig.js'; 
 import logger from './config/loggerConfig.js';
 
 dotenv.config();
@@ -42,13 +44,15 @@ app.use((req, res, next) => {
 mongoose.connect(config.mongoUrl, {
     useNewUrlParser: true,
     useUnifiedTopology: true
-}).then(() => logger.info('Mongo connected'))
-.catch(err => logger.error('Mongo connection error:', err));
+}).then(() => logger.info('MongoDB conectado'))
+.catch(err => logger.error('Error de conexión a MongoDB:', err));
 
 app.use('/', viewRouter);
 app.use('/api/products', productRouter);
-app.use('/api/auth', authRouter);
+app.use('/api/carts', cartRouter);
+app.use('/api/auth', userRouter);
 
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 
 app.use(errorHandler);
 
