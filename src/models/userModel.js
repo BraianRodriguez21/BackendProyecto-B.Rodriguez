@@ -1,5 +1,10 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
+import { changeUserRole } from '../controllers/userController.js';
+
+const router = Router();
+
+router.put('/premium/:uid', changeUserRole);
 
 const userSchema = new mongoose.Schema({
     first_name: { type: String, required: true },
@@ -23,3 +28,4 @@ userSchema.pre('save', function(next) {
 });
 
 export const User = mongoose.model('User', userSchema);
+export default router;

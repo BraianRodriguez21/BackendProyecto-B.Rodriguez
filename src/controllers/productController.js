@@ -1,5 +1,6 @@
-import { findAllProducts, findProductById, createProduct, updateProductById, deleteProductById } from '../dao/productDao.js';
+import { findAllProducts, findProductById, createProduct as daoCreateProduct, updateProductById, deleteProductById } from '../dao/productDao.js';
 import { ErrorDictionary, CustomError } from '../utils/errorDictionary.js';
+import logger from '../config/loggerConfig.js';
 
 export const getProductById = async (req, res, next) => {
     try {
@@ -9,6 +10,7 @@ export const getProductById = async (req, res, next) => {
         }
         res.json({ success: true, product });
     } catch (error) {
+        logger.error(`Error getting product by ID: ${error.message}`);
         next(error);
     }
 };
@@ -24,15 +26,17 @@ export const getProducts = async (req, res, next) => {
         const products = await findAllProducts(query ? JSON.parse(query) : {}, options);
         res.json({ success: true, products });
     } catch (error) {
+        logger.error(`Error getting products: ${error.message}`);
         next(error);
     }
 };
 
 export const createProduct = async (req, res, next) => {
     try {
-        const product = await createProduct(req.body);
+        const product = await daoCreateProduct(req.body);
         res.json({ success: true, product });
     } catch (error) {
+        logger.error(`Error creating product: ${error.message}`);
         next(error);
     }
 };
@@ -45,6 +49,7 @@ export const updateProductById = async (req, res, next) => {
         }
         res.json({ success: true, product });
     } catch (error) {
+        logger.error(`Error updating product: ${error.message}`);
         next(error);
     }
 };
@@ -57,6 +62,7 @@ export const deleteProductById = async (req, res, next) => {
         }
         res.json({ success: true, message: 'Producto eliminado' });
     } catch (error) {
+        logger.error(`Error deleting product: ${error.message}`);
         next(error);
     }
 };

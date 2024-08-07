@@ -3,7 +3,8 @@ import mongoose from 'mongoose';
 const productSchema = new mongoose.Schema({
     title: String,
     price: Number,
-    description: String
+    description: String,
+    owner: { type: String, default: 'admin' }
 });
 
 const Product = mongoose.model('Product', productSchema);

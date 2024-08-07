@@ -1,9 +1,13 @@
 import { Router } from 'express';
+import { forgotPassword, resetPassword } from '../controllers/authController.js';
 import passport from 'passport';
 import { User } from '../models/userModel.js';
 import { generateToken } from '../config/jwtConfig.js';
 
 const router = Router();
+
+router.post('/forgot-password', forgotPassword);
+router.post('/reset-password/:token', resetPassword);
 
 router.post('/register', async (req, res) => {
     try {
@@ -20,7 +24,7 @@ router.post('/register', async (req, res) => {
     }
 });
 
-router.post('/login', async (req, res, next) => {
+router.post('/login', (req, res, next) => {
     passport.authenticate('local', { session: false }, (err, user, info) => {
         if (err || !user) {
             return res.status(400).json({ success: false, message: 'Credenciales incorrectas' });
@@ -44,4 +48,4 @@ router.get('/current', passport.authenticate('jwt', { session: false }), (req, r
     res.json({ user: req.user });
 });
 
-export { router as authRouter };
+export default router;

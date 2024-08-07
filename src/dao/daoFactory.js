@@ -1,4 +1,4 @@
-import { UserDAO } from '../dao/userDAO.js';
+import { UserDAO } from '../dao/userDao.js';
 
 export class DAOFactory {
   static getDAO(type) {

@@ -50,11 +50,13 @@
 import { Router } from 'express';
 import { registerUser, loginUser, loginAdmin } from '../controllers/userController.js';
 import passport from 'passport';
+import { registerUser, loginUser, loginAdmin, changeUserRole } from '../controllers/userController.js';
 
 const router = Router();
 
 router.post('/register', registerUser);
 router.post('/login', passport.authenticate('local', { session: false }), loginUser);
 router.post('/login/admin', loginAdmin);
+router.put('/premium/:uid', changeUserRole);
 
 export { router as userRouter };
