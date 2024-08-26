@@ -4,7 +4,6 @@ import { generateToken } from '../config/jwtConfig.js';
 import bcrypt from 'bcrypt';
 import { config } from '../config/config.js';
 
-// Cambiar el rol de un usuario
 export const changeUserRole = async (req, res, next) => {
     try {
         const { uid } = req.params;

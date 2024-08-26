@@ -47,16 +47,28 @@
 // });
 
 // export default router;
-import { Router } from 'express';
-import { registerUser, loginUser, loginAdmin } from '../controllers/userController.js';
+import express from 'express';
 import passport from 'passport';
-import { registerUser, loginUser, loginAdmin, changeUserRole } from '../controllers/userController.js';
+import { 
+    registerUser, 
+    loginUser, 
+    loginAdmin, 
+    changeUserRole, 
+    updateUserToPremium, 
+    uploadUserDocuments 
+} from '../controllers/userController.js';
+import { upload } from '../middlewares/multerConfig.js';
 
-const router = Router();
+const router = express.Router();
 
 router.post('/register', registerUser);
+
 router.post('/login', passport.authenticate('local', { session: false }), loginUser);
+
 router.post('/login/admin', loginAdmin);
+
 router.put('/premium/:uid', changeUserRole);
 
-export { router as userRouter };
+router.post('/:uid/documents', upload.array('documents'), uploadUserDocuments);
+
+export default router;

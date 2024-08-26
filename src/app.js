@@ -19,6 +19,7 @@ import logger from './config/loggerConfig.js';
 dotenv.config();
 
 const app = express();
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
@@ -31,9 +32,9 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-const httpServer = app.listen(config.port || 8080, () => logger.info(`Servidor en el puerto ${config.port || 8080}`));
-
 handlebarsConf(app);
+
+const httpServer = app.listen(config.port || 8080, () => logger.info(`Servidor en el puerto ${config.port || 8080}`));
 const io = socketConf(httpServer);
 
 app.use((req, res, next) => {
@@ -51,6 +52,7 @@ app.use('/', viewRouter);
 app.use('/api/products', productRouter);
 app.use('/api/carts', cartRouter);
 app.use('/api/auth', userRouter);
+app.use('/api/users', userRouter);  // Consolidating user-related routes here
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 
