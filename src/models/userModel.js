@@ -7,16 +7,14 @@ const userSchema = new mongoose.Schema({
     email: { type: String, required: true, unique: true },
     age: { type: Number, required: true },
     password: { type: String, required: true },
-    cart: { type: mongoose.Schema.Types.ObjectId, ref: 'Cart' },
+    cart: { type: mongoose.Schema.Types.ObjectId, ref: 'Cart' }, // Refers to Cart model
     role: { type: String, enum: ['user', 'premium', 'admin'], default: 'user' },
-    
     documents: [
         {
             name: { type: String, required: true },
-            reference: { type: String, required: true },
+            reference: { type: String, required: true }
         }
     ],
-
     last_connection: { type: Date }
 });
 
@@ -32,5 +30,4 @@ userSchema.pre('save', function(next) {
 });
 
 const User = mongoose.model('User', userSchema);
-
 export default User;

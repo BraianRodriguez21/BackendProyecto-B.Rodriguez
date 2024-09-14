@@ -54,10 +54,10 @@ import {
     loginUser, 
     loginAdmin, 
     changeUserRole, 
-    updateUserToPremium, 
-    uploadUserDocuments 
+    upgradeToPremium, 
+    uploadDocuments 
 } from '../controllers/userController.js';
-import { upload } from '../middlewares/multerConfig.js';
+import upload from '../config/multerConfig.js'; 
 
 const router = express.Router();
 
@@ -69,6 +69,8 @@ router.post('/login/admin', loginAdmin);
 
 router.put('/premium/:uid', changeUserRole);
 
-router.post('/:uid/documents', upload.array('documents'), uploadUserDocuments);
+router.put('/premium/:uid/upgrade', upgradeToPremium);
+
+router.post('/:uid/documents', upload.array('documents'), uploadDocuments);
 
 export default router;
